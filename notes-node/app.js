@@ -1,21 +1,22 @@
-console.log("Start");
 const fs = require('fs');
-const os = require('os');
 const _ = require('lodash');
-
 const notes = require('./notes.js');
 
-// console.log( _.isString(true) );
-// console.log( _.isString("Hello"));
+var command = process.argv[2];
 
-console.log(_.uniq([1,1,2,2,3,3,4,4,5,5]));
+console.log(command);
+console.log(process.argv);
 
-// console.log(os.userInfo());
-// var user = os.userInfo();
-// fs.appendFile('greetings.txt',  `Hello  ${user.username} !` , function (err) {
-//         if(err) {
-//             console.log("Unable to write file");
-//         }
-// } );
-//
-// console.log(notes.add(24,7));
+if (command === 'add') {
+  console.log("adding new node")
+
+} else if(command === 'list') {
+  console.log("listing nodes");
+} else if(command === 'read') {
+  console.log("read node")
+} else if(command === 'remove') {
+  console.log("remove node")
+}
+else {
+  console.log("command not recognized");
+}
