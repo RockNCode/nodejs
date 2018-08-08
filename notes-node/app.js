@@ -9,7 +9,7 @@ var command = process.argv[2];
 
 console.log(command);
 console.log('Yargs',argv);
-
+debugger;
 if (command === 'add') {
   console.log("adding new note")
   notes.addNote(argv.title, argv.body);
