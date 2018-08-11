@@ -1,13 +1,20 @@
-var somePromise = new Promise( (resolve,reject) => {
-  setTimeout(()=>{
-    //resolve('hey, it worked.');
-    reject('Unable to fullfil promise.');
-  },2000);
+var asyncAdd = (a,b) => {
+  return new Promise((resolve,reject)=>{
+    setTimeout(()=>{
+      if(typeof a === 'number' && typeof b === 'number') {
+        resolve(a+b);
+      } else {
+        reject('Not a number');
+      }
+    }, 1500);
+  });
+};
 
-});
-
-somePromise.then((message)=>{
-  console.log(message);
-},(errorMessage)=>{
-  console.log(errorMessage);
+asyncAdd(10,4).then((result)=>{
+  console.log(result);
+  return asyncAdd(result,33);
+}).then((result)=>{
+  console.log("Second result: " + result);
+}).catch((errorMessage) => {
+  console.log("Should be a number");
 });
