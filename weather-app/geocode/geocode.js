@@ -4,8 +4,8 @@ const yargs = require('yargs');
 var geocodeAddress = (address,callback) => {
   var encodedAddress = encodeURIComponent(address);
   var strURI = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodedAddress}`;
-  console.log(encodedAddress);
-  console.log(strURI);
+  // console.log(encodedAddress);
+  // console.log(strURI);
   request({
     url: strURI,
     json: true
@@ -30,3 +30,4 @@ var geocodeAddress = (address,callback) => {
 };
 
 module.exports.geocodeAddress = geocodeAddress;
+// ffe21182f00d50285ab4099996016adb
