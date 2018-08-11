@@ -19,7 +19,7 @@ var geocodeAddress = (address,callback) => {
       errorStr = "Unable to find that address";
       callback(errorStr,undefined);
     } else {
-       console.log("Address:" + body.results[0].formatted_address);
+       // console.log("Address:" + body.results[0].formatted_address);
        callback(undefined,{
          address: body.results[0].formatted_address,
          latitude: body.results[0].geometry.location.lat,
