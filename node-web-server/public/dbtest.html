@@ -1,0 +1,82 @@
+<html>
+    <body>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.3.0/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.3.0/firebase-database.js"></script>
+        <H2>Testing.</H2>
+        <input type="text" id="uname" name="uname" required
+               minlength="4" maxlength="13"
+               placeholder="Account name" />
+        <input type="number" id="guess" name="guess" required
+               minlength="4" maxlength="8"
+               placeholder="0.0" />
+        <button id="buttonGuess">
+          Add guess
+        </button>
+        <script>
+            $( "#buttonGuess" ).click(function() {
+                // var userName = $("#uname").val();
+                // var guess = $("#guess").val()
+                // // alert("Button clicked")
+                // $.get( `https://us-central1-dbtest-f5ad8.cloudfunctions.net/addGuess?accountName=${userName}&guessPrice=${guess}`, function( data ) {
+                //     console.log("success");
+                // }).fail(()=>{
+                //     console.log("failure");
+                //     //alert("Failed update database.");
+                // });
+
+                $.get( `https://us-central1-dbtest-f5ad8.cloudfunctions.net/getLastGuesses`, function( data ) {
+                    console.log("success " + JSON.stringify(data.val(),undefined,2));
+                }).fail(()=>{
+                    console.log("failure " + JSON.stringify(data.val(),undefined,2));
+                    //alert("Failed update database.");
+                });
+            });
+        </script>
+        <H3>Current bitcoin price: </H3>
+        <H3 id="bcprice" name="bcprice"></H3>
+        <ul>
+        </ul>
+        <script>
+            $.get( "https://api.coindesk.com/v1/bpi/currentprice.json", function( data ) {
+                  console.log(JSON.stringify(data,undefined,2));
+                  var obj = JSON.parse(data);
+                  var price = obj.bpi.USD.rate;
+                //   alert( "Price is " + price);
+                  $("#bcprice").text(price);
+
+                }).fail(()=>{
+                    console.log("failure");
+                    alert("Failed to get price");
+                });
+        </script>
+
+        <script>
+          // Initialize Firebase
+          console.log("Initializing firebase")
+          var config = {
+            apiKey: "AIzaSyAn73QwXUdyORyym5iCMo1qYTKirPBMYSw",
+            authDomain: "dbtest-f5ad8.firebaseapp.com",
+            databaseURL: "https://dbtest-f5ad8.firebaseio.com",
+            projectId: "dbtest-f5ad8",
+            storageBucket: "dbtest-f5ad8.appspot.com",
+            messagingSenderId: "386160058842"
+          };
+
+          var app = firebase.initializeApp(config);
+          var database = app.database();
+          var mRef = database.ref('guesses');
+
+          mRef.on('child_added', function(data) {
+            console.log(data.val());
+            var name = data.val().accountName;
+            var text = data.val().guessPrice;
+            var date = data.val().datePretty;
+
+          });
+
+        </script>
+
+    </body>
+
+</html>
