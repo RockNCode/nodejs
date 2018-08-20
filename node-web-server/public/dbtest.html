@@ -18,8 +18,8 @@
                 var userName = $("#uname").val();
                 var guess = $("#guess").val()
                 // alert("Button clicked")
-                //$.get( `https://us-central1-dbtest-f5ad8.cloudfunctions.net/addGuess?accountName=${userName}&guessPrice=${guess}`, function( data ) {
-                $.get( `http://localhost:5000/dbtest-f5ad8/us-central1/addGuess?accountName=${userName}&guessPrice=${guess}`, function( data ) {
+                $.get( `https://us-central1-dbtest-f5ad8.cloudfunctions.net/addGuess?accountName=${userName}&guessPrice=${guess}`, function( data ) {
+                //$.get( `http://localhost:5000/dbtest-f5ad8/us-central1/addGuess?accountName=${userName}&guessPrice=${guess}`, function( data ) {
                     console.log("success");
                 }).fail(()=>{
                     console.log("failure");
