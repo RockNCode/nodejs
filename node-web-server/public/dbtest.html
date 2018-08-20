@@ -15,27 +15,33 @@
         </button>
         <script>
             $( "#buttonGuess" ).click(function() {
-                // var userName = $("#uname").val();
-                // var guess = $("#guess").val()
-                // // alert("Button clicked")
-                // $.get( `https://us-central1-dbtest-f5ad8.cloudfunctions.net/addGuess?accountName=${userName}&guessPrice=${guess}`, function( data ) {
-                //     console.log("success");
-                // }).fail(()=>{
-                //     console.log("failure");
-                //     //alert("Failed update database.");
-                // });
-
-                $.get( `https://us-central1-dbtest-f5ad8.cloudfunctions.net/getLastGuesses`, function( data ) {
-                    console.log("success " + JSON.stringify(data.val(),undefined,2));
+                var userName = $("#uname").val();
+                var guess = $("#guess").val()
+                // alert("Button clicked")
+                //$.get( `https://us-central1-dbtest-f5ad8.cloudfunctions.net/addGuess?accountName=${userName}&guessPrice=${guess}`, function( data ) {
+                $.get( `http://localhost:5000/dbtest-f5ad8/us-central1/addGuess?accountName=${userName}&guessPrice=${guess}`, function( data ) {
+                    console.log("success");
                 }).fail(()=>{
-                    console.log("failure " + JSON.stringify(data.val(),undefined,2));
+                    console.log("failure");
                     //alert("Failed update database.");
                 });
+
+                // $.get( `https://us-central1-dbtest-f5ad8.cloudfunctions.net/getLastGuesses`, function( data ) {
+                //     console.log("success " + JSON.stringify(data.val(),undefined,2));
+                // }).fail(()=>{
+                //     console.log("failure " + JSON.stringify(data.val(),undefined,2));
+                //     //alert("Failed update database.");
+                // });
             });
         </script>
         <H3>Current bitcoin price: </H3>
         <H3 id="bcprice" name="bcprice"></H3>
-        <ul>
+        <H3>Current closest guess: </H3>
+        <H3 id="closest_guess" name="closest_guess"></H3>
+        <H4> Latest guesses</H4>
+        <ul id="latest"></ul>
+        <H4> All guesses</H4>
+        <ul id="all">
         </ul>
         <script>
             $.get( "https://api.coindesk.com/v1/bpi/currentprice.json", function( data ) {
@@ -53,6 +59,9 @@
 
         <script>
           // Initialize Firebase
+          var closestPrice = -100000;
+          var closestAccount ="";
+          var lowestGap = 500000;
           console.log("Initializing firebase")
           var config = {
             apiKey: "AIzaSyAn73QwXUdyORyym5iCMo1qYTKirPBMYSw",
@@ -66,15 +75,42 @@
           var app = firebase.initializeApp(config);
           var database = app.database();
           var mRef = database.ref('guesses');
+          var mLatest = database.ref('latest');
 
           mRef.on('child_added', function(data) {
-            console.log(data.val());
+            // console.log(data.val());
             var name = data.val().accountName;
-            var text = data.val().guessPrice;
+            var price = data.val().guessPrice;
             var date = data.val().datePretty;
-
+            $("#all").append(`<li> ${date} : ${name} : $ ${price} USD</li>`)
           });
 
+          mLatest.on('child_added', function(data) {
+            console.log(data.val());
+            var name = data.val().accountName;
+            var price = data.val().guessPrice;
+            var date = data.val().datePretty;
+            $("#latest").append(`<li> ${date} : ${name} : $ ${price} USD</li>`)
+
+            // closest guess
+            var bitcoinPriceText = $("#bcprice").text();
+            var bitcoinPrice = Number(bitcoinPriceText.replace(/[^0-9.-]+/g,""));
+            console.log( "Bitcoin price : " + bitcoinPrice);
+            if(closestPrice === -100000) {
+              closestPrice = price;
+              closestAccount = name;
+            } else {
+              console.log(" Old close : "+ closestPrice +"checking " + price + "against btc : " + bitcoinPrice);
+              if( Math.abs(price - bitcoinPrice) < lowestGap) {
+                console.log("new closest :"+ price);
+                closestPrice = price;
+                closestAccount = name;
+                lowestGap = Math.abs(price - bitcoinPrice);
+              }
+            }
+            $("#closest_guess").text(`${closestAccount} : ${closestPrice}`);
+
+          });
         </script>
 
     </body>
