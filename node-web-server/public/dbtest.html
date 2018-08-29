@@ -10,6 +10,9 @@
         <input type="number" id="guess" name="guess" required
                minlength="4" maxlength="8"
                placeholder="0.0" />
+        <input type="number" id="staked" name="staked" required
+              minlength="4" maxlength="8"
+              placeholder="0.1" />
         <button id="buttonGuess">
           Add guess
         </button>
@@ -17,9 +20,10 @@
             $( "#buttonGuess" ).click(function() {
                 var userName = $("#uname").val();
                 var guess = $("#guess").val()
+                var stakedAmount = $("#staked").val()
                 // alert("Button clicked")
-                $.get( `https://us-central1-dbtest-f5ad8.cloudfunctions.net/addGuess?accountName=${userName}&guessPrice=${guess}`, function( data ) {
-                //$.get( `http://localhost:5000/dbtest-f5ad8/us-central1/addGuess?accountName=${userName}&guessPrice=${guess}`, function( data ) {
+                //$.get( `https://us-central1-dbtest-f5ad8.cloudfunctions.net/addGuess?accountName=${userName}&guessPrice=${guess}`, function( data ) {
+                $.get( `http://localhost:5000/dbtest-f5ad8/us-central1/addGuess?accountName=${userName}&guessPrice=${guess}&staked=${stakedAmount}`, function( data ) {
                     console.log("success");
                 }).fail(()=>{
                     console.log("failure");
@@ -74,24 +78,16 @@
 
           var app = firebase.initializeApp(config);
           var database = app.database();
-          var mRef = database.ref('guesses');
-          var mLatest = database.ref('latest');
+          var mRef = database.ref('/tables/guessByDate/2018-08-20');
+          var mLatest = mRef.limitToLast(10);
 
           mRef.on('child_added', function(data) {
-            // console.log(data.val());
-            var name = data.val().accountName;
-            var price = data.val().guessPrice;
-            var date = data.val().datePretty;
-            $("#all").append(`<li> ${date} : ${name} : $ ${price} USD</li>`)
-          });
-
-          mLatest.on('child_added', function(data) {
             console.log(data.val());
             var name = data.val().accountName;
             var price = data.val().guessPrice;
             var date = data.val().datePretty;
-            $("#latest").append(`<li> ${date} : ${name} : $ ${price} USD</li>`)
-
+            var staked = data.val().staked;
+            $("#all").append(`<li> ${date} : ${name} : $ ${price} USD , staked : ${staked}</li>`)
             // closest guess
             var bitcoinPriceText = $("#bcprice").text();
             var bitcoinPrice = Number(bitcoinPriceText.replace(/[^0-9.-]+/g,""));
@@ -109,7 +105,21 @@
               }
             }
             $("#closest_guess").text(`${closestAccount} : ${closestPrice}`);
+          });
 
+          mLatest.on('child_added', function(data) {
+            console.log(data.val());
+            var name = data.val().accountName;
+            var price = data.val().guessPrice;
+            var date = data.val().datePretty;
+            var staked = data.val().staked;
+
+            $("#latest").prepend(`<li> ${date} : ${name} : $ ${price} USD , staked : ${staked}</li>`);
+
+          });
+
+          mLatest.on('child_removed', function(data) {
+            $("#latest").find('li').last().remove();
           });
         </script>
 
