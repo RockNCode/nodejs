@@ -88,12 +88,12 @@
           var gameState;
 
           if (dateNormalized.getHours() >= 20 ) {
-            var day = parseInt(dateNormalized.getDate());
-            // Belongs to the bucket from the day before.
-            // dateNormalized.setDate(day-1);
             dateNormalized.setHours(20);
             gameState = 0;
           } else if(dateNormalized.getHours() >= 0 && dateNormalized.getHours() < 12) {
+            // Belongs to the bucket from the day before.
+            var day = parseInt(dateNormalized.getDate());
+            dateNormalized.setDate(day-1);
             dateNormalized.setHours(20);
             gameState = 0;
           } else if(dateNormalized.getHours() >= 12 && dateNormalized.getHours() < 18) {
