@@ -3,6 +3,7 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
         <script src="https://www.gstatic.com/firebasejs/5.3.0/firebase-app.js"></script>
         <script src="https://www.gstatic.com/firebasejs/5.3.0/firebase-database.js"></script>
+        <script src="http://stevenlevithan.com/assets/misc/date.format.js"></script>
         <H2>Testing.</H2>
         <input type="text" id="uname" name="uname" required
                minlength="4" maxlength="13"
@@ -10,9 +11,13 @@
         <input type="number" id="guess" name="guess" required
                minlength="4" maxlength="8"
                placeholder="0.0" />
-        <input type="number" id="staked" name="staked" required
-              minlength="4" maxlength="8"
-              placeholder="0.1" />
+        <select name="cars" id="staked" name="staked">
+          <option >0.1</option>
+          <option >0.15</option>
+          <option >0.2</option>
+
+         </select>
+
         <button id="buttonGuess">
           Add guess
         </button>
@@ -78,14 +83,77 @@
 
           var app = firebase.initializeApp(config);
           var database = app.database();
-          var mRef = database.ref('/tables/guessByDate/2018-08-20');
+
+          var dateNormalized = new Date();
+          var gameState;
+
+          if (dateNormalized.getHours() >= 20 ) {
+            dateNormalized.setHours(20);
+            gameState = 0;
+          } else if(dateNormalized.getHours() >= 0 && dateNormalized.getHours() < 12) {
+            dateNormalized.setHours(20);
+            gameState = 0;
+          } else if(dateNormalized.getHours() >= 12 && dateNormalized.getHours() < 18) {
+            dateNormalized.setHours(12);
+            gameState = 1;
+          } else if(dateNormalized.getHours() >= 18 && dateNormalized.getHours() < 20) {
+            dateNormalized.setHours(18);
+            gameState = 2;
+          }
+          dateNormalized.setMinutes(0);
+          dateNormalized.setSeconds(0);
+          dateNormalized.setMilliseconds(0);
+
+          var dateString = dateFormat(dateNormalized,"isoDateTime")+"-0700";
+          var dateString20;
+          var dateString12;
+          console.log("date normalized " + dateFormat(dateNormalized,"isoDateTime"));
+          console.log("date UTC " + dateNormalized.toUTCString());
+          var mRef = database.ref(`/tables/guessByDate/${dateString}`);
+          var mRef20;
+          var mRef12;
+
+          mRef.on('child_added', (data)=>{ appendToCurrentTable(data) });
           var mLatest = mRef.limitToLast(10);
 
-          mRef.on('child_added', function(data) {
+          // we need an additional db reference for older states
+          if(gameState == 1) {
+            dateNormalized.setHours(20);
+            dateString20 = dateFormat(dateNormalized,"isoDateTime")+"-0700";
+            mRef20 = database.ref(`/tables/guessByDate/${dateString20}`);
+            mRef20.on('child_added', (data)=>{ appendToCurrentTable(data) });
+          } else if(gameState == 2) {
+            dateNormalized.setHours(20);
+            dateString20 = dateFormat(dateNormalized,"isoDateTime")+"-0700";
+            dateNormalized.setHours(12);
+            dateString12 = dateFormat(dateNormalized,"isoDateTime")+"-0700";
+            mRef20 = database.ref(`/tables/guessByDate/${dateString20}`);
+            mRef12 = database.ref(`/tables/guessByDate/${dateString12}`);
+            mRef20.on('child_added', (data)=>{ appendToCurrentTable(data) });
+            mRef12.on('child_added', (data)=>{ appendToCurrentTable(data) });
+          }
+
+          //ToDo: if less than 10 need to grab values from older table.
+          mLatest.on('child_added', function(data) {
             console.log(data.val());
             var name = data.val().accountName;
             var price = data.val().guessPrice;
-            var date = data.val().datePretty;
+            var date = data.val().timestamp;
+            var staked = data.val().staked;
+
+            $("#latest").prepend(`<li> ${date} : ${name} : $ ${price} USD , staked : ${staked}</li>`);
+
+          });
+
+          mLatest.on('child_removed', function(data) {
+            $("#latest").find('li').last().remove();
+          });
+
+          function appendToCurrentTable(data) {
+            console.log(data.val());
+            var name = data.val().accountName;
+            var price = data.val().guessPrice;
+            var date = data.val().timestamp;
             var staked = data.val().staked;
             $("#all").append(`<li> ${date} : ${name} : $ ${price} USD , staked : ${staked}</li>`)
             // closest guess
@@ -105,22 +173,7 @@
               }
             }
             $("#closest_guess").text(`${closestAccount} : ${closestPrice}`);
-          });
-
-          mLatest.on('child_added', function(data) {
-            console.log(data.val());
-            var name = data.val().accountName;
-            var price = data.val().guessPrice;
-            var date = data.val().datePretty;
-            var staked = data.val().staked;
-
-            $("#latest").prepend(`<li> ${date} : ${name} : $ ${price} USD , staked : ${staked}</li>`);
-
-          });
-
-          mLatest.on('child_removed', function(data) {
-            $("#latest").find('li').last().remove();
-          });
+          }
         </script>
 
     </body>
