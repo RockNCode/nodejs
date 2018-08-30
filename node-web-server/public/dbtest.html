@@ -88,6 +88,9 @@
           var gameState;
 
           if (dateNormalized.getHours() >= 20 ) {
+            var day = parseInt(dateNormalized.getDate());
+            // Belongs to the bucket from the day before.
+            // dateNormalized.setDate(day-1);
             dateNormalized.setHours(20);
             gameState = 0;
           } else if(dateNormalized.getHours() >= 0 && dateNormalized.getHours() < 12) {
@@ -104,7 +107,7 @@
           dateNormalized.setSeconds(0);
           dateNormalized.setMilliseconds(0);
 
-          var dateString = dateFormat(dateNormalized,"isoDateTime")+"-0700";
+          var dateString = dateFormat(dateNormalized,"isoDateTime");
           var dateString20;
           var dateString12;
           console.log("date normalized " + dateFormat(dateNormalized,"isoDateTime"));
@@ -119,14 +122,14 @@
           // we need an additional db reference for older states
           if(gameState == 1) {
             dateNormalized.setHours(20);
-            dateString20 = dateFormat(dateNormalized,"isoDateTime")+"-0700";
+            dateString20 = dateFormat(dateNormalized,"isoDateTime");
             mRef20 = database.ref(`/tables/guessByDate/${dateString20}`);
             mRef20.on('child_added', (data)=>{ appendToCurrentTable(data) });
           } else if(gameState == 2) {
             dateNormalized.setHours(20);
-            dateString20 = dateFormat(dateNormalized,"isoDateTime")+"-0700";
+            dateString20 = dateFormat(dateNormalized,"isoDateTime");
             dateNormalized.setHours(12);
-            dateString12 = dateFormat(dateNormalized,"isoDateTime")+"-0700";
+            dateString12 = dateFormat(dateNormalized,"isoDateTime");
             mRef20 = database.ref(`/tables/guessByDate/${dateString20}`);
             mRef12 = database.ref(`/tables/guessByDate/${dateString12}`);
             mRef20.on('child_added', (data)=>{ appendToCurrentTable(data) });
