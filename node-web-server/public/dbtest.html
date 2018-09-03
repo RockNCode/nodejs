@@ -27,8 +27,8 @@
                 var guess = $("#guess").val()
                 var stakedAmount = $("#staked").val()
                 // alert("Button clicked")
-                $.get( `https://us-central1-dbtest-f5ad8.cloudfunctions.net/addGuess?accountName=${userName}&guessPrice=${guess}&staked=${stakedAmount}`, function( data ) {
-                //$.get( `http://localhost:5000/dbtest-f5ad8/us-central1/addGuess?accountName=${userName}&guessPrice=${guess}&staked=${stakedAmount}`, function( data ) {
+                //$.get( `https://us-central1-dbtest-f5ad8.cloudfunctions.net/addGuess?accountName=${userName}&guessPrice=${guess}&staked=${stakedAmount}`, function( data ) {
+                $.get( `http://localhost:5000/dbtest-f5ad8/us-central1/addGuess?accountName=${userName}&guessPrice=${guess}&staked=${stakedAmount}`, function( data ) {
                     console.log("success");
                 }).fail(()=>{
                     console.log("failure");
@@ -49,15 +49,23 @@
         <H3 id="closest_guess" name="closest_guess"></H3>
         <!-- <H4> Latest guesses</H4>
         <ul id="latest"></ul> -->
+        <H4> Users table</H4>
+        <ul id="tableUsers">
+        </ul>
+
+
         <H4> Time slot 1 : 20:00 to 11:59 next day</H4>
         <ul id="timeTable1">
         </ul>
+
         <H4> Time slot 2 : 12:00 to 17:59</H4>
         <ul id="timeTable2">
         </ul>
+
         <H4> Time slot 3 : 18:00 to 19:59</H4>
         <ul id="timeTable3">
         </ul>
+
         <script>
             $.get( "https://api.coindesk.com/v1/bpi/currentprice.json", function( data ) {
                   console.log(JSON.stringify(data,undefined,2));
@@ -121,6 +129,7 @@
           var mRefTime1; // timeslot 1 reference
           var mRefTime2; // timeslot 2 reference
           var mRefTime3; // timeslot 3 reference
+          var mRefUsers = database.ref(`/tables/users/`); // users table
 
           while(dateIt < latestBidDate) {
             var dateString = dateFormat(dateIt,"isoUtcDateTime");
@@ -144,6 +153,13 @@
           mRefTime1.on('child_added', (data)=>{ appendToCurrentTable(data,"timeTable1") });
           mRefTime2.on('child_added', (data)=>{ appendToCurrentTable(data,"timeTable2") });
           mRefTime3.on('child_added', (data)=>{ appendToCurrentTable(data,"timeTable3") });
+
+          mRefUsers.on('child_added', (data)=>{
+            console.log("User added: " + data.key + " tokens " + data.val().tokens);
+            var accountName = data.key;
+            var tokens = data.val().tokens;
+            $(`#tableUsers`).append(`<li> name : ${accountName} : tokens: ${tokens} </li>`)
+          });
 
           function appendToCurrentTable(data,timeTable) {
             console.log(data.val());
